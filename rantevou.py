@@ -6,6 +6,7 @@ import urllib.request
 import json
 from datetime import date, datetime, timedelta
 from dataclasses import dataclass
+from threading import Lock
 
 from babel.dates import format_date
 
@@ -191,15 +192,19 @@ def format_message(ts: Timeslot, center: VaccinationCenter):
 if __name__ == "__main__":
     centers, clock_zones = request_centers_and_clock_zones(zip_code, person_id)
 
+    active_slots_mu = Lock() # for avoiding race condition with signal handlers
     active_slots: dict[Slot, str] = {}
 
     def handler(signum, frame):
+        active_slots_mu.acquire()
         logging.info("deleting messages for active slots")
         for _, msgid in active_slots.items():
             delete_telegram_message(msgid)
         exit(0)
 
     signal.signal(signal.SIGINT, handler)
+    signal.signal(signal.SIGTERM, handler)
+
     while True:
         processed = 0
         for center in centers:
@@ -211,6 +216,7 @@ if __name__ == "__main__":
                     start_date = ts.date + timedelta(days=1)
                     slot = Slot(center, ts.date, ts.clock_zone)
                     processed += 1
+                    active_slots_mu.acquire()
                     if ts.availability_percent > 0 and slot not in active_slots:
                         msg = format_message(ts, center)
                         logging.info(f"new: {slot} with {msg}")
@@ -220,6 +226,7 @@ if __name__ == "__main__":
                         logging.info(f"filled: {slot}")
                         delete_telegram_message(active_slots[slot])
                         del active_slots[slot]
+                    active_slots_mu.release()
 
         logging.debug(f"processed {processed} slots")
         time.sleep(10 + 10 * random.random())
