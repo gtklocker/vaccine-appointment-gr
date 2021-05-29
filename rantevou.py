@@ -192,7 +192,7 @@ def format_message(ts: Timeslot, center: VaccinationCenter):
 if __name__ == "__main__":
     centers, clock_zones = request_centers_and_clock_zones(zip_code, person_id)
 
-    active_slots_mu = Lock() # for avoiding race condition with signal handlers
+    active_slots_mu = Lock()  # for avoiding race condition with signal handlers
     active_slots: dict[Slot, str] = {}
 
     def handler(signum, frame):
