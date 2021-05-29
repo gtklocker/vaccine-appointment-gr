@@ -84,6 +84,11 @@ clock_zones: dict[int, ClockZone] = {}  # 1 -> "11:00-14:00", etc.
 json_encode = lambda m: str.encode(json.dumps(m))
 
 
+def warn_if_no_key(d, key):
+    if key not in d:
+        logging.warn(f"expected '{key}' in '{d}' but was not there")
+
+
 def send_telegram_message(msg) -> str:
     req = urllib.request.Request(
         f"https://api.telegram.org/bot{telegram_token}/sendMessage",
@@ -95,6 +100,7 @@ def send_telegram_message(msg) -> str:
     )
     with urllib.request.urlopen(req) as f:
         res = json.loads(f.read().decode("utf-8"))
+        warn_if_no_key(res, "result")
         return res["result"]["message_id"]
 
 
@@ -121,6 +127,8 @@ def request_centers_and_clock_zones(zip_code, person_id):
     )
     with urllib.request.urlopen(req) as f:
         res = json.loads(f.read().decode("utf-8"))
+        for k in ("centers", "timezones"):
+            warn_if_no_key(res, k)
         centers = list(map(VaccinationCenter.from_json, res["centers"]))
         clock_zones = {cz.id: cz for cz in map(ClockZone.from_json, res["timezones"])}
         return (centers, clock_zones)
@@ -149,12 +157,35 @@ def request_timeslots(person_id, center_id, start_date):
     )
     with urllib.request.urlopen(req) as f:
         res = json.loads(f.read().decode("utf-8"))
+        warn_if_no_key(res, "timeslotsFree")
         for json_timeslot in res.get("timeslotsFree", []):
             yield Timeslot.from_json(json_timeslot)
 
 
 def pretty_date(d):
     return format_date(d, "EEEE d MMMM", locale="el")
+
+
+def availability_emoji(percentage):
+    emoji = orange
+    if percentage < 100 / 3:
+        emoji = red
+    elif percentage > 200 / 3:
+        emoji = green
+    return emoji
+
+
+siren = chr(0x1F6A8)
+green = chr(0x1F7E9)
+orange = chr(0x1F7E7)
+red = chr(0x1F7E5)
+book_url = "https://emvolio.gov.gr/app"
+book_now = f"Κλείστε τώρα! {book_url}"
+
+
+def format_message(ts: Timeslot, center: VaccinationCenter):
+    box = availability_emoji(ts.availability_percent)
+    return f"{siren}{siren} Διαθεσιμότητα {box} για {pretty_date(ts.date)} (ώρα {ts.clock_zone}) στο {center.name}! {siren}{siren}\n{book_now}"
 
 
 if __name__ == "__main__":
@@ -169,13 +200,6 @@ if __name__ == "__main__":
         exit(0)
 
     signal.signal(signal.SIGINT, handler)
-
-    siren = chr(0x1F6A8)
-    green = chr(0x1F7E9)
-    orange = chr(0x1F7E7)
-    red = chr(0x1F7E5)
-    book_url = "https://emvolio.gov.gr/app"
-    book_now = f"Κλείστε τώρα! {book_url}"
     while True:
         processed = 0
         for center in centers:
@@ -188,21 +212,12 @@ if __name__ == "__main__":
                     slot = Slot(center, ts.date, ts.clock_zone)
                     processed += 1
                     if ts.availability_percent > 0 and slot not in active_slots:
-                        avail_emoji = orange
-                        if ts.availability_percent < 100 / 3:
-                            avail_emoji = red
-                        elif ts.availability_percent > 200 / 3:
-                            avail_emoji = green
-                        msg = f"{siren}{siren} Διαθεσιμότητα {avail_emoji} για %s (ώρα %s) στο %s! {siren}{siren}\n{book_now}" % (
-                            pretty_date(ts.date),
-                            ts.clock_zone,
-                            center.name,
-                        )
-                        logging.info(msg)
+                        msg = format_message(ts, center)
+                        logging.info(f"new: {slot} with {msg}")
                         msgid = send_telegram_message(msg)
                         active_slots[slot] = msgid
                     elif ts.availability_percent == 0 and slot in active_slots:
-                        logging.info("filled: %s" % msg)
+                        logging.info(f"filled: {slot}")
                         delete_telegram_message(active_slots[slot])
                         del active_slots[slot]
 
