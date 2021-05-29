@@ -190,8 +190,6 @@ def format_message(ts: Timeslot, center: VaccinationCenter):
 
 
 if __name__ == "__main__":
-    centers, clock_zones = request_centers_and_clock_zones(zip_code, person_id)
-
     active_slots_mu = Lock()  # for avoiding race condition with signal handlers
     active_slots: dict[Slot, str] = {}
 
@@ -206,7 +204,9 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, handler)
 
     while True:
+        centers, clock_zones = request_centers_and_clock_zones(zip_code, person_id)
         processed = 0
+
         for center in centers:
             start_date = datetime.now().date() + timedelta(days=center.days_after_today)
             for _ in range(2):  # each iteration is one week worth of timeslots
