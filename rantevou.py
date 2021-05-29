@@ -149,7 +149,7 @@ def request_timeslots(person_id, center_id, start_date):
     )
     with urllib.request.urlopen(req) as f:
         res = json.loads(f.read().decode("utf-8"))
-        for json_timeslot in res["timeslotsFree"]:
+        for json_timeslot in res.get("timeslotsFree", []):
             yield Timeslot.from_json(json_timeslot)
 
 
