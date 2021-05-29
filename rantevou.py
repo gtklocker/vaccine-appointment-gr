@@ -88,7 +88,7 @@ def send_telegram_message(msg) -> str:
     req = urllib.request.Request(
         f"https://api.telegram.org/bot{telegram_token}/sendMessage",
         data=json_encode(
-            {"chat_id": telegram_chat_id, "text": msg, "disable_notification": True}
+            {"chat_id": telegram_chat_id, "text": msg, "disable_notification": False}
         ),
         headers={"content-type": "application/json", "accept": "application/json"},
         method="POST",
