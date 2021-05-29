@@ -164,7 +164,7 @@ if __name__ == "__main__":
 
     def handler(signum, frame):
         logging.info("deleting messages for active slots")
-        for msgid, _ in active_slots.items():
+        for _, msgid in active_slots.items():
             delete_telegram_message(msgid)
         exit(0)
 
