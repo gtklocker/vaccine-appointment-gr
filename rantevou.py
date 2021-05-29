@@ -74,7 +74,7 @@ class Timeslot:
 
 @dataclass(frozen=True)
 class Slot:
-    center: VaccinationCenter
+    center_id: int
     date: date
     clock_zone: ClockZone
 
@@ -214,7 +214,7 @@ if __name__ == "__main__":
                 for ts in request_timeslots(person_id, center.id, start_date):
                     # our data is in date ascending order so start_date is ever increasing
                     start_date = ts.date + timedelta(days=1)
-                    slot = Slot(center, ts.date, ts.clock_zone)
+                    slot = Slot(center.id, ts.date, ts.clock_zone)
                     processed += 1
                     active_slots_mu.acquire()
                     if ts.availability_percent > 0 and slot not in active_slots:
