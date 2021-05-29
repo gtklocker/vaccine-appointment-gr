@@ -193,7 +193,7 @@ if __name__ == "__main__":
                             avail_emoji = red
                         elif ts.availability_percent > 200 / 3:
                             avail_emoji = green
-                        msg = f"{siren}{siren} Διαθεσιμότητα {avail_emoji} για την %s (ώρα %s) στο %s! {siren}{siren}\n{book_now}" % (
+                        msg = f"{siren}{siren} Διαθεσιμότητα {avail_emoji} για %s (ώρα %s) στο %s! {siren}{siren}\n{book_now}" % (
                             pretty_date(ts.date),
                             ts.clock_zone,
                             center.name,
