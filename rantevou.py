@@ -168,18 +168,18 @@ def pretty_date(d):
 
 
 def availability_emoji(percentage):
-    emoji = orange
+    emoji = yellow
     if percentage < 100 / 3:
-        emoji = red
+        emoji = orange
     elif percentage > 200 / 3:
         emoji = green
     return emoji
 
 
 siren = chr(0x1F6A8)
-green = chr(0x1F7E9)
 orange = chr(0x1F7E7)
-red = chr(0x1F7E5)
+yellow = chr(0x1F7E8)
+green = chr(0x1F7E9)
 book_url = "https://emvolio.gov.gr/app"
 book_now = f"Κλείστε τώρα! {book_url}"
 
