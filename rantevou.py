@@ -205,7 +205,7 @@ if __name__ == "__main__":
         for center in centers:
             start_date = datetime.now().date() + timedelta(days=center.days_after_today)
             for _ in range(2):  # each iteration is one week worth of timeslots
-                time.sleep(random.random())
+                time.sleep(0.5 * random.random())
                 for ts in request_timeslots(person_id, center.id, start_date):
                     # our data is in date ascending order so start_date is ever increasing
                     start_date = ts.date + timedelta(days=1)
@@ -222,4 +222,4 @@ if __name__ == "__main__":
                         del active_slots[slot]
 
         logging.debug(f"processed {processed} slots")
-        time.sleep(30 + 30 * random.random())
+        time.sleep(10 + 10 * random.random())
