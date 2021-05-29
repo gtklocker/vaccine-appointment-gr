@@ -4,13 +4,10 @@ import random
 import logging
 import urllib.request
 import json
-import locale
 from datetime import date, datetime, timedelta
 from dataclasses import dataclass
 
 from babel.dates import format_date
-
-locale.setlocale(locale.LC_TIME, "el_GR")
 
 logging.basicConfig(
     format="%(asctime)s %(message)s",
