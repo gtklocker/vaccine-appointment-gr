@@ -208,7 +208,9 @@ if __name__ == "__main__":
         processed = 0
 
         for center in centers:
-            start_date = datetime.now().date() + timedelta(days=center.days_after_today)
+            start_date = datetime.now().date() + timedelta(
+                days=center.days_after_today + 1
+            )
             for _ in range(2):  # each iteration is one week worth of timeslots
                 time.sleep(0.5 * random.random())
                 for ts in request_timeslots(person_id, center.id, start_date):
