@@ -1,0 +1,11 @@
+{
+    "person-id": "33333333",
+    "zip-code": "11111",
+    "telegram": {
+        "token": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "chat-id": "yyyyyyyyyyyyyy"
+    },
+    "headers": {
+        "authorization": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+    }
+}
